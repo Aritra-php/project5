@@ -34,6 +34,11 @@ $rImage=$_FILES['rImage'];
 $rFinalOcc=implode(',',$rOcc);
 $iName=$_FILES['rImage']['name'];
 $i_tmp_name=$_FILES['rImage']['tmp_name'];
+$ext=explode(".",$iName);
+$allowed=array("jpg","jpeg","png","jpe","jif","jfif","jfi","webp","tiff","tif","psd","raw","arw",
+"nrw","bmp","ind","heif","svg");
+if(in_array($ext[1],$allowed))
+{
 move_uploaded_file($i_tmp_name,'images/'.$iName);
 $sql="SELECT rEmail FROM gamora WHERE rEmail='".$rEmail."'";
 $result=mysqli_query($conn,$sql);
@@ -50,12 +55,13 @@ VALUES('$rName','$rEmail','$rPass','$rConPass','$rGender','$rDate','$rCity','$rA
 '$rFinalOcc','$iName')";
 if(mysqli_query($conn,$sql))
 {
-echo '<div class="alert alert-warning mt-3 text-center">Registered Successfully</div>';
+echo '<div class="alert alert-success mt-3 text-center">Registered Successfully</div>';
 }
 }
 else
 {
 echo '<div class="alert alert-warning mt-3 text-center">Password and Confirm Password must be same</div>';
+}
 }
 }
 }
@@ -177,6 +183,10 @@ HouseWife<input type="checkbox" name="rOcc[]" value="HouseWife" class="form-inli
 <?php if(in_array('Housewife',$b)) {echo "checked";}?>>
 </div>
 
+<img src="<?php if(isset($row['rImage'])) {echo "images/".$row['rImage'];}
+else{"images/avatar.png";}?>">
+
+
 <input type="file" name="rImage" required>
 <input type="hidden" name="Srno" value="<?php if(isset($row['Srno'])) {echo $row['Srno'];}?>">
 <input type="submit" value="Update" name="Update" class="btn btn-warning">
@@ -237,7 +247,7 @@ echo "<td>".$row['rDate']."</td>";
 echo "<td>".$row['rCity']."</td>";
 echo "<td>".$row['rAddress']."</td>";
 echo "<td>".$row['rOcc']."</td>";
-echo '<td><img src="images/'.$row['rImage'].'"></td>';
+echo '<td><img src="images/'.$row['rImage'].'" style="height:100px; width=100px;"></td>';
 echo '<td><form action="" method="POST">
 <input type="hidden" name="Srno" value='.$row['Srno'].'>
 <input type="submit" value="Delete" name="Delete">
@@ -263,7 +273,7 @@ echo "Data not found";
 if(isset($_POST['Delete']))
 {
 $Srno=$_POST['Srno'];
-$sql="SELECT *FROM gamora";
+$sql="SELECT *FROM gamora WHERE Srno='".$Srno."'";
 $result=mysqli_query($conn,$sql);
 $row=mysqli_fetch_assoc($result);
 $dImage=$row['rImage'];
@@ -291,6 +301,13 @@ echo '<div class="alert alert-warning mt-3 text-center">Please Fill All The Fiel
 else
 {
 $Srno=$_POST['Srno'];
+    
+$sql="SELECT *FROM gamora WHERE Srno='".$Srno."'";
+$result=mysqli_query($conn,$sql);
+$row=mysqli_fetch_assoc($result);
+$old_img=$row['rImage'];
+    
+    
 $rName=$_POST['rName'];
 $rEmail=$_POST['rEmail'];
 $rPass=$_POST['rPass'];
@@ -304,13 +321,22 @@ $rImage=$_FILES['rImage'];
 $rFinalOcc=implode(',',$rOcc);
 $iName=$_FILES['rImage']['name'];
 $i_tmp_name=$_FILES['rImage']['tmp_name'];
+    
+$ext=explode(".",$iName);
+$allowed=array("jpg","jpeg","png","jpe","jif","jfif","jfi","webp","tiff","tif","psd","raw","arw",
+"nrw","bmp","ind","heif","svg");
+if(in_array($ext[1],$allowed))
+{
 move_uploaded_file($i_tmp_name,'images/'.$iName);
 $sql="UPDATE gamora SET rName='$rName',rEmail='$rEmail',rPass='$rPass',rConPass='$rConPass',
 rGender='$rGender',rDate='$rDate',rCity='$rCity',rAddress='$rAddress',rOcc='$rFinalOcc',
 rImage='$iName' WHERE Srno='".$Srno."'";
+}
 if(mysqli_query($conn,$sql))
 {
-echo '<div class="alert alert-success mt-3 text-center">Data Updated Successfully</div>';
+unlink("images/".$old_img);
+echo '<script>window.alert("If Image Extension Is Valid Then Data Updated Successfully")</script>';
+echo '<script>location.href="registrationpage.php"</script>';
 }
 else
 {
